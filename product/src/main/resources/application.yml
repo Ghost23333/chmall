@@ -1,0 +1,16 @@
+#配置mysql数据源信息
+spring:
+  datasource:
+    username: root
+    password: mysql+09070210
+    url: jdbc:mysql://110.40.133.141:3306/chmall_pms?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: auto
+server:
+  port: 10000
