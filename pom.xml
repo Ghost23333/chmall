@@ -17,7 +17,11 @@
         <module>renren-fast</module>
         <module>renren-generator</module>
         <module>common</module>
+        <module>gateway</module>
     </modules>
+    <dependencies>
+
+    </dependencies>
 
 
 </project>

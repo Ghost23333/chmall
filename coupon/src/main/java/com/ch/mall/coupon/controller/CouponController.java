@@ -1,15 +1,14 @@
 package com.ch.mall.coupon.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.web.bind.annotation.*;
 
 import com.ch.mall.coupon.entity.CouponEntity;
 import com.ch.mall.coupon.service.CouponService;
@@ -26,11 +25,24 @@ import com.ch.common.utils.R;
  * @date 2022-11-05 19:47:37
  */
 @RestController
+@RefreshScope
 @RequestMapping("coupon/coupon")
 public class CouponController {
     @Autowired
     private CouponService couponService;
 
+    @Value("${ch.name}")
+    private String ch_name;
+    @Value("${ch.age}")
+    private String ch_age;
+
+    @GetMapping("/member/list")
+    public R memberCoupon(){
+        CouponEntity couponEntity = new CouponEntity();
+        couponEntity.setCouponName("满一万减一块");
+        return R.ok().put("coupons",Arrays.asList(couponEntity))
+                .put("ch",Arrays.asList(ch_name,ch_age));
+    }
     /**
      * 列表
      */
