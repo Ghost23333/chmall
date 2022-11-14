@@ -1,19 +1,25 @@
 package com.ch.mall.product;
-
 import com.ch.mall.product.entity.BrandEntity;
 import com.ch.mall.product.service.BrandService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.annotation.Resource;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest()
 public class ProductApplicationTests {
 
     @Autowired
     BrandService brandService;
+
     @Test
     public void contextLoads() {
         BrandEntity brandEntity = new BrandEntity();
@@ -21,5 +27,6 @@ public class ProductApplicationTests {
         brandService.save(brandEntity);
         System.out.println("保存成功");
     }
+
 
 }
