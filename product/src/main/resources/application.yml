@@ -22,7 +22,7 @@ logging:
     com.ch.maill: debug
 alibaba:
   cloud:
-    access-key: 
-    secret-key: 
+    access-key: LTAI5tRvr5yLHAJUFyFhn2xC
+    secret-key: Dkbsxn0kIzggs2Fk16Hy1HX7mqcEye
     oss:
-      endpoint: 
+      endpoint: oss-cn-hangzhou.aliyuncs.com
