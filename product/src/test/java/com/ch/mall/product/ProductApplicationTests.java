@@ -1,6 +1,7 @@
 package com.ch.mall.product;
 import com.ch.mall.product.entity.BrandEntity;
 import com.ch.mall.product.service.BrandService;
+import com.ch.mall.product.service.CategoryService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class ProductApplicationTests {
 
     @Autowired
     BrandService brandService;
+    @Autowired
+    CategoryService categoryService;
 
     @Test
     public void contextLoads() {
@@ -26,6 +29,14 @@ public class ProductApplicationTests {
         brandEntity.setName("华为");
         brandService.save(brandEntity);
         System.out.println("保存成功");
+    }
+
+    @Test
+     public void testSelectCatelogPath(){
+        Long[] longs = categoryService.selectCatelogPath(225L);
+        for (Long aLong : longs) {
+            System.out.println(aLong);
+        }
     }
 
 

@@ -3,7 +3,7 @@
 
 <mapper namespace="com.ch.mall.ware.dao.PurchaseDetailDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.ch.mall.ware.entity.PurchaseDetailEntity" id="purchaseDetailMap">
         <result property="id" column="id"/>
         <result property="purchaseId" column="purchase_id"/>
@@ -13,6 +13,14 @@
         <result property="wareId" column="ware_id"/>
         <result property="status" column="status"/>
     </resultMap>
+    <update id="updateStatusByPurchaseIds">
+        update wms_purchase_detail
+        set status = #{code}
+        where purchase_id in
+        <foreach collection="ids" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
 
 
 </mapper>

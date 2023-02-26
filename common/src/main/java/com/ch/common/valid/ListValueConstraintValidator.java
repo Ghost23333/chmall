@@ -1,6 +1,5 @@
 package com.ch.common.valid;
 
-import jdk.internal.org.objectweb.asm.Handle;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -11,7 +10,7 @@ import java.util.Set;
  * @author chenhong
  * @version 1.0.0
  * @ClassName ListValueConstraintValidator.java
- * @Description TODO
+ * @Description
  * @createTime 2022年11月14日 20:40:00
  */
 public class ListValueConstraintValidator implements ConstraintValidator<ListValue,Integer> {

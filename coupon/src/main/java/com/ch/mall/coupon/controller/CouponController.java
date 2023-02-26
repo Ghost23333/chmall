@@ -1,6 +1,5 @@
 package com.ch.mall.coupon.controller;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -31,18 +30,6 @@ public class CouponController {
     @Autowired
     private CouponService couponService;
 
-    @Value("${ch.name}")
-    private String ch_name;
-    @Value("${ch.age}")
-    private String ch_age;
-
-    @GetMapping("/member/list")
-    public R memberCoupon(){
-        CouponEntity couponEntity = new CouponEntity();
-        couponEntity.setCouponName("满一万减一块");
-        return R.ok().put("coupons",Arrays.asList(couponEntity))
-                .put("ch",Arrays.asList(ch_name,ch_age));
-    }
     /**
      * 列表
      */

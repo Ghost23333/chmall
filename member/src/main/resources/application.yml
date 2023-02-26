@@ -5,8 +5,12 @@ spring:
     password: mysql+09070210
     url: jdbc:mysql://110.40.133.141:3306/chmall_ums?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
     driver-class-name: com.mysql.cj.jdbc.Driver
-
-
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+  application:
+    name: member
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   global-config:

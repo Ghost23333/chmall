@@ -2,6 +2,7 @@ package com.ch.mall.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ch.common.utils.PageUtils;
+import com.ch.common.utils.R;
 import com.ch.mall.product.entity.CategoryEntity;
 
 import java.util.List;
@@ -23,5 +24,11 @@ public interface CategoryService extends IService<CategoryEntity> {
     void removeMenusByIds(List<Long> asList);
 
     List<CategoryEntity> selectBrothersByParentCid(Long parentCid, Integer level);
+
+    Long[] selectCatelogPath(Long catelogId);
+
+    R updateCascade(CategoryEntity category);
+
+    R saveCategory(CategoryEntity category);
 }
 

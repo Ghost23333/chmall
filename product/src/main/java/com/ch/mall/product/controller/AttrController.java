@@ -1,21 +1,18 @@
 package com.ch.mall.product.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.ch.mall.product.entity.AttrEntity;
-import com.ch.mall.product.service.AttrService;
 import com.ch.common.utils.PageUtils;
 import com.ch.common.utils.R;
+import com.ch.mall.product.entity.ProductAttrValueEntity;
+import com.ch.mall.product.service.AttrService;
+import com.ch.mall.product.service.ProductAttrValueService;
+import com.ch.mall.product.vo.AttrRespVo;
+import com.ch.mall.product.vo.AttrVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -30,13 +27,39 @@ import com.ch.common.utils.R;
 public class AttrController {
     @Autowired
     private AttrService attrService;
+    @Autowired
+    private ProductAttrValueService productAttrValueService;
+
+    /**
+     * @return 获取spu规格
+     * /product/attr/base/listforspu/{spuId}
+     */
+    @GetMapping("/base/listforspu/{spuId}")
+    public R listForSpu(@PathVariable("spuId") Long spuId){
+        List<ProductAttrValueEntity> data = productAttrValueService.listForSpuAttrValue(spuId);
+        return R.ok().put("data", data);
+    }
+
+
+    /**
+     * @param params
+     * @param catelogId
+     * @return 返回基本属性
+     */
+    @GetMapping("/{attrType}/list/{catelogId}")
+    public R AttrList(@RequestParam Map<String, Object> params,
+                          @PathVariable("catelogId") Long catelogId,
+                          @PathVariable("attrType") String attrType) {
+        PageUtils page = attrService.queryAttrPage(params, catelogId, attrType);
+        return R.ok().put("page", page);
+    }
 
     /**
      * 列表
      */
     @RequestMapping("/list")
     //@RequiresPermissions("product:attr:list")
-    public R list(@RequestParam Map<String, Object> params){
+    public R list(@RequestParam Map<String, Object> params) {
         PageUtils page = attrService.queryPage(params);
 
         return R.ok().put("page", page);
@@ -47,32 +70,38 @@ public class AttrController {
      * 信息
      */
     @RequestMapping("/info/{attrId}")
-   //@RequiresPermissions("product:attr:info")
-    public R info(@PathVariable("attrId") Long attrId){
-		AttrEntity attr = attrService.getById(attrId);
-
-        return R.ok().put("attr", attr);
+    //@RequiresPermissions("product:attr:info")
+    public R info(@PathVariable("attrId") Long attrId) {
+        AttrRespVo attrRespVo = attrService.getAttrRespInfo(attrId);
+        return R.ok().put("attr", attrRespVo);
     }
 
     /**
+     * written
      * 保存
      */
     @RequestMapping("/save")
     //@RequiresPermissions("product:attr:save")
-    public R save(@RequestBody AttrEntity attr){
-		attrService.save(attr);
-
+    public R save(@RequestBody AttrVo attrvo) {
+        attrService.saveAttrVo(attrvo);
         return R.ok();
     }
 
     /**
-     * 修改
+     * written
+     * 修改 xxx
      */
     @RequestMapping("/update")
     //@RequiresPermissions("product:attr:update")
-    public R update(@RequestBody AttrEntity attr){
-		attrService.updateById(attr);
+    public R update(@RequestBody AttrVo attrvo) {
+        attrService.updateAttrVo(attrvo);
+        return R.ok();
+    }
 
+    @PostMapping("/update/{spuId}")
+    //@RequiresPermissions("product:attr:update")
+    public R updateSpuAttrs(@PathVariable("spuId") Long spuId,@RequestBody List<ProductAttrValueEntity> entities) {
+        productAttrValueService.updateSpuAttrs(spuId,entities);
         return R.ok();
     }
 
@@ -81,8 +110,8 @@ public class AttrController {
      */
     @RequestMapping("/delete")
     //@RequiresPermissions("product:attr:delete")
-    public R delete(@RequestBody Long[] attrIds){
-		attrService.removeByIds(Arrays.asList(attrIds));
+    public R delete(@RequestBody Long[] attrIds) {
+        attrService.removeByIds(Arrays.asList(attrIds));
 
         return R.ok();
     }

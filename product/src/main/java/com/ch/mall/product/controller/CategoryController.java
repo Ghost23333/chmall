@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 
+import com.ch.common.exception.BizCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,7 +47,7 @@ public class CategoryController {
     public R info(@PathVariable("catId") Long catId) {
         CategoryEntity category = categoryService.getById(catId);
 
-        return R.ok().put("category", category);
+        return R.ok().put("data", category);
     }
 
     /**
@@ -55,20 +56,7 @@ public class CategoryController {
     @RequestMapping("/save")
     //@RequiresPermissions("product:category:save")
     public R save(@RequestBody CategoryEntity category) {
-        //判断是否会冲突
-        CategoryEntity parent = categoryService.getById(category.getParentCid());
-        if(category.getName().equals(parent.getName())){
-            return R.error();
-        }else {
-            List<CategoryEntity> categoryEntities = categoryService.selectBrothersByParentCid(category.getParentCid(), category.getCatLevel());
-            for (CategoryEntity categoryEntity : categoryEntities) {
-                if(categoryEntity.getName().equals(category.getName())){
-                    return R.error(R.DUPLICATE_KEY_EXCEPTION,"重复菜单");
-                }
-            }
-        }
-        categoryService.save(category);
-        return R.ok();
+        return categoryService.saveCategory(category);
     }
 
     /**
@@ -77,21 +65,7 @@ public class CategoryController {
     @RequestMapping("/update")
     //@RequiresPermissions("product:category:update")
     public R update(@RequestBody CategoryEntity category) {
-        //判断是否会冲突
-        CategoryEntity temp = categoryService.getById(category.getCatId());
-        CategoryEntity parent = categoryService.getById(temp.getParentCid());
-        if(category.getName().equals(parent.getName())){
-            return R.error(R.DUPLICATE_KEY_EXCEPTION,"重复菜单");
-        }else {
-            List<CategoryEntity> categoryEntities = categoryService.selectBrothersByParentCid(temp.getParentCid(), temp.getCatLevel());
-            for (CategoryEntity categoryEntity : categoryEntities) {
-                if(categoryEntity.getName().equals(category.getName())){
-                    return R.error(R.DUPLICATE_KEY_EXCEPTION,"重复菜单");
-                }
-            }
-        }
-        categoryService.updateById(category);
-        return R.ok();
+        return categoryService.updateCascade(category);
     }
 
     /**

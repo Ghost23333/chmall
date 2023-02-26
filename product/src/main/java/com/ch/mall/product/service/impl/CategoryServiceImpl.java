@@ -1,23 +1,23 @@
 package com.ch.mall.product.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ch.common.exception.BizCodeEnum;
 import com.ch.common.utils.PageUtils;
 import com.ch.common.utils.Query;
-
+import com.ch.common.utils.R;
 import com.ch.mall.product.dao.CategoryDao;
+import com.ch.mall.product.entity.CategoryBrandRelationEntity;
 import com.ch.mall.product.entity.CategoryEntity;
+import com.ch.mall.product.service.CategoryBrandRelationService;
 import com.ch.mall.product.service.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service("categoryService")
@@ -25,6 +25,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Autowired
     private CategoryDao categoryDao;
+
+    @Autowired
+    private CategoryBrandRelationService categoryBrandRelationService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -85,6 +88,68 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     @Override
     public List<CategoryEntity> selectBrothersByParentCid(Long parentCid, Integer level) {
         return categoryDao.selectBrothersByParentCid(parentCid, level);
+    }
+
+    /**
+     * 找到catelogid的完整路径
+     * @param catelogId
+     * @return 【父 子 孙】
+     * 因为最多只有三级分类，所以这里采用迭代的方法，不采用递归
+     */
+    @Override
+    public Long[] selectCatelogPath(Long catelogId) {
+        List<Long> path = new ArrayList<>();
+        CategoryEntity category = this.getById(catelogId);
+        if(category.getParentCid() != 0){
+            CategoryEntity parent = this.getById(category.getParentCid());
+            if(parent.getParentCid() != 0){
+                path.add(parent.getParentCid());//爷
+            }
+            path.add(parent.getCatId());//父
+        }
+        path.add(catelogId);//自己
+        return path.toArray(new Long[0]);
+
+    }
+
+    @Override
+    @Transactional
+    public R updateCascade(CategoryEntity category) {
+        //判断是否会冲突
+        CategoryEntity temp = this.getById(category.getCatId());
+        CategoryEntity parent = this.getById(temp.getParentCid());
+        if(category.getName().equals(parent.getName())){
+            return R.error(BizCodeEnum.DUPLICATE_KEY_EXCEPTION.getCode(), BizCodeEnum.DUPLICATE_KEY_EXCEPTION.getMsg());
+        }else {
+            List<CategoryEntity> categoryEntities = this.selectBrothersByParentCid(temp.getParentCid(), temp.getCatLevel());
+            for (CategoryEntity categoryEntity : categoryEntities) {
+                if(categoryEntity.getName().equals(category.getName())){
+                    return R.error(BizCodeEnum.DUPLICATE_KEY_EXCEPTION.getCode(), BizCodeEnum.DUPLICATE_KEY_EXCEPTION.getMsg());
+                }
+            }
+        }
+        this.updateById(category);
+        categoryBrandRelationService.updateCategory(category.getCatId(),category.getName());
+        return R.ok();
+    }
+
+    @Override
+    @Transactional
+    public R saveCategory(CategoryEntity category) {
+        //判断是否会冲突
+        CategoryEntity parent = this.getById(category.getParentCid());
+        if(category.getName().equals(parent.getName())){
+            return R.error();
+        }else {
+            List<CategoryEntity> categoryEntities = this.selectBrothersByParentCid(category.getParentCid(), category.getCatLevel());
+            for (CategoryEntity categoryEntity : categoryEntities) {
+                if(categoryEntity.getName().equals(category.getName())){
+                    return R.error(BizCodeEnum.DUPLICATE_KEY_EXCEPTION.getCode(), BizCodeEnum.DUPLICATE_KEY_EXCEPTION.getMsg());
+                }
+            }
+        }
+        this.save(category);
+        return R.ok();
     }
 
 

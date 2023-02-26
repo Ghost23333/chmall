@@ -1,15 +1,15 @@
 package com.ch.mall.ware.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.function.LongFunction;
 
 
+import com.ch.mall.ware.vo.PurchaseDoneVo;
+import com.ch.mall.ware.vo.PurchaseMergeVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ch.mall.ware.entity.PurchaseEntity;
 import com.ch.mall.ware.service.PurchaseService;
@@ -31,6 +31,43 @@ public class PurchaseController {
     @Autowired
     private PurchaseService purchaseService;
 
+
+    /**
+     * 采购人员完成采购单
+     */
+    @PostMapping("/done")
+    public R finish(@RequestBody PurchaseDoneVo vo){
+        purchaseService.finish(vo);
+        return R.ok();
+    }
+    /**
+     * 采购人员领取采购单
+     */
+    @PostMapping("/received")
+    public R receive(@RequestBody List<Long> ids){
+        purchaseService.receive(ids);
+        return R.ok();
+    }
+
+    /**
+     * 合并采购单
+     */
+    @PostMapping("/merge")
+    public R merge(@RequestBody PurchaseMergeVo vo){
+        purchaseService.merge(vo);
+        return R.ok();
+    }
+
+
+    /**
+     * 获取未领取的采购单
+     */
+    @RequestMapping("/unreceive/list")
+    public R unreceiveList(@RequestParam Map<String, Object> params){
+        PageUtils page = purchaseService.queryUnreceivedPage(params);
+
+        return R.ok().put("page", page);
+    }
     /**
      * 列表
      */

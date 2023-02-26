@@ -15,11 +15,12 @@
         <module>product</module>
         <module>ware</module>
         <module>renren-fast</module>
-        <module>renren-generator</module>
         <module>common</module>
         <module>gateway</module>
         <module>thirdparty</module>
+        <module>es_search</module>
     </modules>
+
     <dependencies>
 
     </dependencies>
