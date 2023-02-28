@@ -10,9 +10,11 @@ import com.ch.common.to.es.SkuEsModel;
 import com.ch.common.utils.PageUtils;
 import com.ch.common.utils.Query;
 import com.ch.common.utils.R;
+import com.ch.mall.product.constant.ProductConstant;
 import com.ch.mall.product.dao.SpuInfoDao;
 import com.ch.mall.product.entity.*;
 import com.ch.mall.product.feign.CouponFeignService;
+import com.ch.mall.product.feign.SearchFeignService;
 import com.ch.mall.product.feign.WareFeignService;
 import com.ch.mall.product.service.*;
 import com.ch.mall.product.vo.SpuSaveVo;
@@ -54,6 +56,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     AttrService attrService;
     @Autowired
     WareFeignService wareFeignService;
+    @Autowired
+    SearchFeignService searchFeignService;
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<SpuInfoEntity> page = this.page(
@@ -191,7 +195,6 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Override
     public void up(Long spuId) {
-        List<SkuEsModel> skuProducts = new ArrayList<>();
         //组装需要的数据
         //1. 查询当前spu下对应的sku
         List<SkuInfoEntity> skus = skuInfoService.getSkusBySpuId(spuId);
@@ -200,6 +203,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         List<Long> attrIds = productAttrValueEntities.stream().map(attr -> {
             return attr.getAttrId();
         }).collect(Collectors.toList());
+
         List<Long> searchAttrIds = attrService.selectSearchAttrs(attrIds);
         List<SkuEsModel.Attrs> attrsList = productAttrValueEntities.stream().filter(item -> {
             return searchAttrIds.contains(item.getAttrId());
@@ -209,8 +213,13 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             return attrs;
         }).collect(Collectors.toList());
         //TODO 3.远程调用 查询库存系统当前sku是否有库存
+        List<SkuHasStockTo> skuHasStockTos = null;
         List<Long> skuIds = skus.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList());
-        List<SkuHasStockTo> skuHasStockTos = wareFeignService.skuHasStockList(skuIds);
+        try {
+            skuHasStockTos = wareFeignService.skuHasStockList(skuIds);
+        }catch (Exception e){
+            log.error("库存服务查询异常：原因{}",e);
+        }
 
         Map<Long,Boolean> skuHasStockMap = new HashMap<>();
         for (SkuHasStockTo skuHasStockTo : skuHasStockTos) {
@@ -238,6 +247,15 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         }).collect(Collectors.toList());
 
         //5. 将数据发给es进行保存
+        R r = searchFeignService.productStatusUp(skuEsModels);
+        if(r.getCode() == 0){
+            //远程调用成功
+            //6. 修改当前spu的状态
+            baseMapper.updateSpuStatus(spuId, ProductConstant.ProductStatusEnum.SPU_UP.getCode());
+        }else {
+            //TODO 重复调用问题 重试机制
+        }
+
     }
 
 

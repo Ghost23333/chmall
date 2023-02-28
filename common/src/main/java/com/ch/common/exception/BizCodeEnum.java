@@ -24,7 +24,6 @@ package com.ch.common.exception;
  *
  *
  **/
- */
 public enum BizCodeEnum {
     UNKNOWN_EXCEPTION(10000,"系统未知异常"),
     VALID_EXCEPTION(10001,"数据校验异常"),

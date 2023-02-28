@@ -15,7 +15,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +27,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
     WareSkuDao wareSkuDao;
     @Autowired
     ProductFeignService productFeignService;
+
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         QueryWrapper<WareSkuEntity> wrapper = new QueryWrapper<>();
@@ -60,15 +60,15 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             wareSkuEntity.setStockLocked(0);
             try {
                 R info = productFeignService.info(skuId);
-                Map<String,Object> skuInfo = (Map<String, Object>) info.get("skuInfo");
-                if(info.getCode() == 0){
+                Map<String, Object> skuInfo = (Map<String, Object>) info.get("skuInfo");
+                if (info.getCode() == 0) {
                     wareSkuEntity.setSkuName((String) skuInfo.get("skuName"));
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
             wareSkuDao.insert(wareSkuEntity);
-        }else {
+        } else {
             wareSkuDao.addStock(skuId, wareId, skuNum);
         }
     }
@@ -79,7 +79,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             SkuHasStockTo skuHasStockTo = new SkuHasStockTo();
             Long stock = baseMapper.selectSkuStock(skuId);
             skuHasStockTo.setSkuId(skuId);
-            skuHasStockTo.setHasStock(stock > 0);
+            skuHasStockTo.setHasStock(stock == null ? false : stock> 0);
             return skuHasStockTo;
         }).collect(Collectors.toList());
         return skuHasStockTos;
